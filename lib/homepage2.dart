@@ -1,28 +1,28 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
+// ignore_for_file: prefer_const_constructors, avoid_print
 
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:stock_demo/homepage2.dart';
-import 'package:stock_demo/stocks_model.dart';
+import 'package:stock_demo/model_2.dart';
 
-class Homepage extends StatefulWidget {
-  const Homepage({super.key});
+class NewHomePage extends StatefulWidget {
+  const NewHomePage({super.key});
 
   @override
-  State<Homepage> createState() => _HomepageState();
+  State<NewHomePage> createState() => _NewHomePageState();
 }
 
-class _HomepageState extends State<Homepage> {
-  List<AllData>? loadAlldata;
+class _NewHomePageState extends State<NewHomePage> {
+  List<MarketState>? loadAlldata;
 
-  stockDataApi() async {
+  livesStockDataApi() async {
     final response = await http.get(
-      Uri.parse("https://api.twelvedata.com/stocks?source=docs"),
+      Uri.parse("https://www.nseindia.com/api/marketStatus"),
     );
     if (response.statusCode == 200) {
-      loadAlldata = StockData.fromJson(jsonDecode(response.body)).data;
+      loadAlldata =
+          LiveStockDataModel.fromJson(jsonDecode(response.body)).marketState;
 
       print(response.body);
       return loadAlldata;
@@ -38,22 +38,10 @@ class _HomepageState extends State<Homepage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: Text("Stocks Demo"),
-        actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(
-                builder: (context) {
-                  return NewHomePage();
-                },
-              ));
-            },
-            icon: Icon(Icons.trending_up),
-          )
-        ],
+        title: Text("NSE Stocks Demo"),
       ),
       body: FutureBuilder(
-        future: stockDataApi(),
+        future: livesStockDataApi(),
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -78,6 +66,7 @@ class _HomepageState extends State<Homepage> {
             shrinkWrap: true,
             itemBuilder: (context, index) {
               return Container(
+                // height: 250,
                 width: MediaQuery.of(context).size.width,
                 margin: EdgeInsets.all(15),
                 padding: EdgeInsets.all(15),
@@ -91,12 +80,12 @@ class _HomepageState extends State<Homepage> {
                       TextSpan(
                         children: [
                           TextSpan(
-                            text: 'Company Name: ',
+                            text: 'Index: ',
                             style: TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 20),
                           ),
                           TextSpan(
-                              text: loadAlldata![index].name.toString(),
+                              text: loadAlldata![index].index.toString(),
                               style: TextStyle(
                                   fontWeight: FontWeight.w500, fontSize: 18)),
                         ],
@@ -106,12 +95,12 @@ class _HomepageState extends State<Homepage> {
                       TextSpan(
                         children: [
                           TextSpan(
-                            text: 'Country: ',
+                            text: 'Market Type: ',
                             style: TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 20),
                           ),
                           TextSpan(
-                              text: loadAlldata![index].country.toString(),
+                              text: loadAlldata![index].market.toString(),
                               style: TextStyle(
                                   fontWeight: FontWeight.w500, fontSize: 18)),
                         ],
@@ -121,12 +110,12 @@ class _HomepageState extends State<Homepage> {
                       TextSpan(
                         children: [
                           TextSpan(
-                            text: 'Currency: ',
+                            text: 'Market: ',
                             style: TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 20),
                           ),
                           TextSpan(
-                              text: loadAlldata![index].currency.toString(),
+                              text: loadAlldata![index].marketStatus.toString(),
                               style: TextStyle(
                                   fontWeight: FontWeight.w500, fontSize: 18)),
                         ],
@@ -136,12 +125,14 @@ class _HomepageState extends State<Homepage> {
                       TextSpan(
                         children: [
                           TextSpan(
-                            text: 'Stock Type: ',
+                            text: 'Market Status: ',
                             style: TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 20),
                           ),
                           TextSpan(
-                              text: loadAlldata![index].type.toString(),
+                              text: loadAlldata![index]
+                                  .marketStatusMessage
+                                  .toString(),
                               style: TextStyle(
                                   fontWeight: FontWeight.w500, fontSize: 18)),
                         ],
